@@ -58,4 +58,25 @@ insert(X,[Y|Rest],[Y|Rest2],Comparator) :- insert(X,Rest,Rest2,Comparator).
 isort([X],[X],_).
 isort([X|Rest],L2,Comparator) :- isort(Rest,L3,Comparator),insert(X,L3,L2,Comparator).
 
-%% Merge sort, one of the most efficient sorting algorithms: O(nlogn).
+%% Merge sort, one of the most efficient sorting algorithms: O(nlogn)?? or O(n^2logn)??
+%% Since lists are used but not arrays copy_list has complexity O(n^2).
+copy_list(L1,Start,End,L2) :- (nonvar(L1),lengthof(L1,N1),End=<N1) -> copy_list0(L1,Start,End,L2).
+copy_list0(L1,Start,End,L2) :- Start<End,index_of(X,L1,Start),L2=[X|Rest],Start1 is Start+1,copy_list0(L1,Start1,End,Rest),!.
+copy_list0(_,Start,End,L2) :- Start>=End,L2=[].
+
+split_at(L,L1,L2,At) :- lengthof(L,N),At<N,copy_list(L,0,At,L1),copy_list(L,At,N,L2).
+
+msort([X],[X],_) :- !.
+msort(L,Ls,Comparator) :- nonvar(L) -> lengthof(L,N),(N mod 2=:=0 -> //(N,2,At);/(N,2,Half),ceiling(Half,At)),
+                                       split_at(L,L1,L2,At),
+                                       msort(L1,Ls1,Comparator),msort(L2,Ls2,Comparator),
+                                       merge(Ls1,Ls2,Ls,Comparator).
+
+merge(L,[],L,_).
+merge([X],[Y],[X,Y],Comparator) :- Fcompare =.. [Comparator,X,Y],call(Fcompare),!.
+merge([X],[Y],[Y,X],Comparator) :- Fcompare =.. [Comparator,Y,X],call(Fcompare),!.
+merge(L1,L2,Lm,Comparator) :- lengthof(L1,N1),I is N1-1,index_of(X,L1,I),index_of(Y,L2,0),
+                              Fcompare =.. [Comparator,X,Y],call(Fcompare),append(L1,L2,Lm),!.
+merge(L1,L2,Lm,Comparator) :- lengthof(L2,N2),I is N2-1,index_of(X,L2,I),index_of(Y,L1,0),
+                              Fcompare =.. [Comparator,X,Y],call(Fcompare),append(L2,L1,Lm),!.
+merge(L1,[X|Rest2],Lm,Comparator) :- insert(X,L1,NL1,Comparator),merge(NL1,Rest2,Lm,Comparator).
