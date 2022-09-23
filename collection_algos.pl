@@ -60,15 +60,22 @@ isort([X|Rest],L2,Comparator) :- isort(Rest,L3,Comparator),insert(X,L3,L2,Compar
 
 %% Merge sort, one of the most efficient sorting algorithms: O(nlogn)?? or O(n^2logn)??
 %% Since lists are used but not arrays copy_list has complexity O(n^2).
-copy_list(L1,Start,End,L2) :- (nonvar(L1),lengthof(L1,N1),End=<N1) -> copy_list0(L1,Start,End,L2).
+copy_list(L1,Start,End,L2) :- (nonvar(L1),lengthof(L1,N1),Start>=0,End=<N1) -> copy_list0(L1,Start,End,L2).
+
+/** This is most inefficient to use index_of and recurssion to implement copy_list0
 copy_list0(L1,Start,End,L2) :- Start<End,index_of(X,L1,Start),L2=[X|Rest],Start1 is Start+1,copy_list0(L1,Start1,End,Rest),!.
 copy_list0(_,Start,End,L2) :- Start>=End,L2=[].
+**/
+%% Lets implement copy_list0 in a smarter way using append
+copy_list0(L1,Start,End,L2) :- Start=<End,lengthof(L1,N1),lengthof(Ls,Start),N2 is N1-End,lengthof(Le,N2),
+                               append(Ls,L2,Lp),append(Lp,Le,L1).
 
-split_at(L,L1,L2,At) :- lengthof(L,N),At<N,copy_list(L,0,At,L1),copy_list(L,At,N,L2).
+%% Lets implement split_at in a smarter way using append directly
+%% split_at(L,L1,L2,At) :- lengthof(L,N),At<N,copy_list(L,0,At,L1),copy_list(L,At,N,L2).
+split_at(L,L1,L2,At) :- lengthof(L,N),At<N,N1 is N-At,lengthof(L1,At),lengthof(L2,N1),append(L1,L2,L).
 
 msort([X],[X],_) :- !.
-msort(L,Ls,Comparator) :- nonvar(L) -> lengthof(L,N),(N mod 2=:=0 -> //(N,2,At);/(N,2,Half),ceiling(Half,At)),
-                                       split_at(L,L1,L2,At),
+msort(L,Ls,Comparator) :- nonvar(L) -> lengthof(L,N),//(N,2,At),split_at(L,L1,L2,At),
                                        msort(L1,Ls1,Comparator),msort(L2,Ls2,Comparator),
                                        merge(Ls1,Ls2,Ls,Comparator).
 
@@ -80,3 +87,5 @@ merge(L1,L2,Lm,Comparator) :- lengthof(L1,N1),I is N1-1,index_of(X,L1,I),index_o
 merge(L1,L2,Lm,Comparator) :- lengthof(L2,N2),I is N2-1,index_of(X,L2,I),index_of(Y,L1,0),
                               Fcompare =.. [Comparator,X,Y],call(Fcompare),append(L2,L1,Lm),!.
 merge(L1,[X|Rest2],Lm,Comparator) :- insert(X,L1,NL1,Comparator),merge(NL1,Rest2,Lm,Comparator).
+%% A cleaner implementation of Merge Sort can be found below
+%% https://ycpcs.github.io/cs340-fall2014/lectures/lecture13.html
