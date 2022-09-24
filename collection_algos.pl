@@ -89,3 +89,16 @@ merge(L1,L2,Lm,Comparator) :- lengthof(L2,N2),I is N2-1,index_of(X,L2,I),index_o
 merge(L1,[X|Rest2],Lm,Comparator) :- insert(X,L1,NL1,Comparator),merge(NL1,Rest2,Lm,Comparator).
 %% A cleaner implementation of Merge Sort can be found below
 %% https://ycpcs.github.io/cs340-fall2014/lectures/lecture13.html
+
+%% Quick Sort algorithm is taken from the following book
+%% The Art of Prolog (Pg. No. 70): https://mitpress.mit.edu/9780262691635/the-art-of-prolog/
+qsort([],[],_).
+qsort([X|Rest],Ls,Comparator) :- partition(Rest,X,Littles,Bigs,Comparator),!,
+                                 qsort(Littles,Lis,Comparator),qsort(Bigs,Bis,Comparator),
+                                 append(Lis,[X|Bis],Ls).
+
+partition([],_,[],[],_).
+partition([X|Rest],Y,[X|Lis],Bis,Comparator) :- Fcompare =.. [Comparator,X,Y],call(Fcompare),
+                                                partition(Rest,Y,Lis,Bis,Comparator).
+partition([X|Rest],Y,Lis,[X|Bis],Comparator) :- Fcompare =.. [Comparator,Y,X],call(Fcompare),
+                                                partition(Rest,Y,Lis,Bis,Comparator).
