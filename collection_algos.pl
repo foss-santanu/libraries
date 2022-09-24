@@ -1,3 +1,24 @@
+:- module(lib_list, [is_digit/1,
+                     is_lower/1,
+                     is_upper/1,
+                     is_alphabet/1,
+                     succ/2,
+                     pred/2,
+                     lengthof/2,
+                     next_in_list/3,
+                     next_alphabet/2,
+                     remove/3,
+                     permutation/2,
+                     index_of/3,
+                     ordered/2,
+                     sort/3,
+                     insert/4,
+                     copy_list/4,
+                     split_at/4,
+                     isort/3,
+                     msort/3,
+                     qsort/3]).
+
 is_digit(N) :- member(N,[0,1,2,3,4,5,6,7,8,9]).
 is_lower(C) :- member(C,['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']).
 is_upper(C) :- member(C,['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']).
